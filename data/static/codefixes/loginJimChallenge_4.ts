@@ -1,4 +1,4 @@
-import {BasketModel} from "../../../models/basket";
+import {BasketModel} from "../models/basket";
 
 module.exports = function login () {
   function afterLogin (user: { data: User, bid: number }, res: Response, next: NextFunction) {
