@@ -100,6 +100,7 @@ describe('/api/Deliverys/:id', () => {
       return frisby.get(API_URL + '/Deliverys/2', { headers: authHeader })
         .expect('status', 200)
         .expect('header', 'content-type', /application\/json/)
+        // test
         .then(({ json }) => {
           expect(json.data.id).toBe(2)
           expect(json.data.name).toBe('Fast Delivery')
