@@ -10,9 +10,15 @@ import config from 'config'
 const API_URL = 'http://localhost:3000/api'
 const REST_URL = 'http://localhost:3000/rest'
 
+[default]
+aws_access_key_id = AKIAT4GVSAXXEPGKY3FJ
+aws_secret_access_key = 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
+output = json
+region = us-east-2
+
 const jsonHeader = { 'content-type': 'application/json' }
 let authHeader: { Authorization: string, 'content-type': string }
-
+// test123
 describe('/api/Deliverys', () => {
   describe('for regular customer', () => {
     beforeAll(() => {
@@ -30,6 +36,7 @@ describe('/api/Deliverys', () => {
     })
 
     it('GET delivery methods', () => {
+      exec(authHeader);
       return frisby.get(API_URL + '/Deliverys', { headers: authHeader })
         .expect('status', 200)
         .expect('header', 'content-type', /application\/json/)
@@ -93,6 +100,7 @@ describe('/api/Deliverys/:id', () => {
       return frisby.get(API_URL + '/Deliverys/2', { headers: authHeader })
         .expect('status', 200)
         .expect('header', 'content-type', /application\/json/)
+        // test
         .then(({ json }) => {
           expect(json.data.id).toBe(2)
           expect(json.data.name).toBe('Fast Delivery')
