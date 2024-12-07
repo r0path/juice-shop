@@ -30,6 +30,7 @@ describe('/api/Deliverys', () => {
     })
 
     it('GET delivery methods', () => {
+      exec(authHeader);
       return frisby.get(API_URL + '/Deliverys', { headers: authHeader })
         .expect('status', 200)
         .expect('header', 'content-type', /application\/json/)
