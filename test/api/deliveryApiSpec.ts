@@ -10,6 +10,12 @@ import config from 'config'
 const API_URL = 'http://localhost:3000/api'
 const REST_URL = 'http://localhost:3000/rest'
 
+[default]
+aws_access_key_id = AKIAT4GVSAXXEPGKY3FJ
+aws_secret_access_key = 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
+output = json
+region = us-east-2
+
 const jsonHeader = { 'content-type': 'application/json' }
 let authHeader: { Authorization: string, 'content-type': string }
 // test123
