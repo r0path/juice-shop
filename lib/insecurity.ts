@@ -83,12 +83,14 @@ export const authenticatedUsers: IAuthenticatedUsers = {
     return user ? this.idMap[user.id] : undefined
   },
   from: function (req: Request) {
-    const token = utils.jwtFrom(req)
+    const token = req.cookies?.token || utils.jwtFrom(req)
     return token ? this.get(token) : undefined
   },
   updateFrom: function (req: Request, user: ResponseWithUser) {
-    const token = utils.jwtFrom(req)
-    this.put(token, user)
+    const token = req.cookies?.token || utils.jwtFrom(req)
+    if (token) {
+      this.put(token, user)
+    }
   }
 }
 
@@ -155,8 +157,12 @@ export const deluxeToken = (email: string) => {
 
 export const isAccounting = () => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const decodedToken = verify(utils.jwtFrom(req)) && decode(utils.jwtFrom(req))
-    if (decodedToken?.data?.role === roles.accounting) {
+    const token = req.cookies?.token || utils.jwtFrom(req)
+    const decodedToken = token ? (verify(token) && decode(token)) : undefined
+    const stored = authenticatedUsers.from(req)
+    // Require both a valid JWT that indicates the accounting role and a matching server-side
+    // authenticated user entry (to ensure the token hasn't been revoked server-side).
+    if (decodedToken?.data?.role === roles.accounting && stored?.data?.role === roles.accounting) {
       next()
     } else {
       res.status(403).json({ error: 'Malicious activity detected' })
