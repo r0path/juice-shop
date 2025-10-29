@@ -4,9 +4,15 @@ module.exports = function login () {
   function afterLogin (user: { data: User, bid: number }, res: Response, next: NextFunction) {
     BasketModel.findOrCreate({ where: { UserId: user.data.id } })
       .then(([basket]: [BasketModel, boolean]) => {
-        const token = security.authorize(user)
-        user.bid = basket.id // keep track of original basket
-        security.authenticatedUsers.put(token, user)
+        const safeUser = { ...user, data: { ...user.data } }
+        // remove sensitive fields before issuing token or storing in memory
+        if (safeUser.data) {
+          delete (safeUser.data as any).password
+          delete (safeUser.data as any).totpSecret
+        }
+        const token = security.authorize(safeUser)
+        safeUser.bid = basket.id // keep track of original basket
+        security.authenticatedUsers.put(token, safeUser)
         res.json({ authentication: { token, bid: basket.id, umail: user.data.email } })
       }).catch((error: Error) => {
         next(error)
