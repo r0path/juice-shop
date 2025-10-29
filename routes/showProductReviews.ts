@@ -39,6 +39,8 @@ module.exports = function productReviews () {
         if (user === undefined || reviews[i].likedBy.includes(user.data.email)) {
           reviews[i].liked = true
         }
+        // Remove likedBy to avoid exposing other users' email addresses (PII)
+        delete reviews[i].likedBy
       }
       res.json(utils.queryResultToJson(reviews))
     }, () => {
