@@ -59,6 +59,13 @@ router.post('/', async (req: Request<Record<string, unknown>, Record<string, unk
   }
 
   try {
+    const storedAnswer = await SecurityAnswerModel.findOne({ where: { UserId: loggedInUser.data.id } })
+    const providedAnswer = (req.body.securityAnswer || '').toString()
+    if (storedAnswer == null || storedAnswer.answer !== insecurity.hmac(providedAnswer)) {
+      next(new Error('Security answer incorrect'))
+      return
+    }
+
     await PrivacyRequestModel.create({
       UserId: loggedInUser.data.id,
       deletionRequested: true
