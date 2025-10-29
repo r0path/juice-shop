@@ -14,7 +14,12 @@ module.exports = function login () {
   }
 
   return (req: Request, res: Response, next: NextFunction) => {
-    models.sequelize.query(`SELECT * FROM Users WHERE email = $1 AND password = '${security.hash(req.body.password || '')}' AND deletedAt IS NULL`,
+    // If no password provided, fail authentication to avoid matching empty-password hashes
+    if (!req.body || typeof req.body.password !== 'string' || req.body.password.length === 0) {
+      res.status(401).send(res.__('Invalid email or password.'))
+      return
+    }
+    models.sequelize.query(`SELECT * FROM Users WHERE email = $1 AND password = '${security.hash(req.body.password)}' AND deletedAt IS NULL`,
       { bind: [ req.body.email ], model: models.User, plain: true })
       .then((authenticatedUser) => {
         const user = utils.queryResultToJson(authenticatedUser)
