@@ -12,11 +12,12 @@ const cache = require('../data/datacache')
 const challenges = cache.challenges
 
 module.exports = function changePassword () {
-  return ({ query, headers, connection }: Request, res: Response, next: NextFunction) => {
-    const currentPassword = query.current
-    const newPassword = query.new
+  return ({ body, query, headers, connection }: Request, res: Response, next: NextFunction) => {
+    // Prefer sensitive values from the request body. Fall back to query for backwards compatibility.
+    const currentPassword = body?.current ?? query.current
+    const newPassword = body?.new ?? query.new
     const newPasswordInString = newPassword?.toString()
-    const repeatPassword = query.repeat
+    const repeatPassword = body?.repeat ?? query.repeat
     if (!newPassword || newPassword === 'undefined') {
       res.status(401).send(res.__('Password cannot be empty.'))
     } else if (newPassword !== repeatPassword) {
