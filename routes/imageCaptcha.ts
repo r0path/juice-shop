@@ -41,7 +41,7 @@ imageCaptchas.verifyCaptcha = () => (req: Request, res: Response, next: NextFunc
     },
     order: [['createdAt', 'DESC']]
   }).then(captchas => {
-    if (!captchas[0] || req.body.answer === captchas[0].answer) {
+    if (captchas[0] && req.body.answer === captchas[0].answer) {
       next()
     } else {
       res.status(401).send(res.__('Wrong answer to CAPTCHA. Please try again.'))
