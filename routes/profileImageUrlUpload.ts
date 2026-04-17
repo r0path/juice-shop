@@ -17,6 +17,24 @@ module.exports = function profileImageUrlUpload () {
     if (req.body.imageUrl !== undefined) {
       const url = req.body.imageUrl
       if (url.match(/(.)*solve\/challenges\/server-side(.)*/) !== null) req.app.locals.abused_ssrf_bug = true
+      try {
+        const parsedUrl = new URL(url)
+        if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+          res.status(400).json({ error: 'Only http and https URLs are allowed' })
+          return
+        }
+        const hostname = parsedUrl.hostname
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' ||
+            hostname === '0.0.0.0' || hostname === '169.254.169.254' ||
+            hostname.startsWith('10.') || hostname.startsWith('192.168.') ||
+            /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)) {
+          res.status(400).json({ error: 'URLs pointing to internal networks are not allowed' })
+          return
+        }
+      } catch {
+        res.status(400).json({ error: 'Invalid URL format' })
+        return
+      }
       const loggedInUser = security.authenticatedUsers.get(req.cookies.token)
       if (loggedInUser) {
         const imageRequest = request
