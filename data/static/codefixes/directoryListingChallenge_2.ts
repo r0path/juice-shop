@@ -1,5 +1,5 @@
 /* /ftp file download */
-  app.use('/ftp(?!/quarantine)/:file', fileServer())
+  app.use('/ftp(?!/quarantine)/:file', security.isAuthorized(), fileServer())
   app.use('/ftp/quarantine/:file', quarantineServer())
 
   app.use('/.well-known', serveIndexMiddleware, serveIndex('.well-known', { icons: true, view: 'details' }))
