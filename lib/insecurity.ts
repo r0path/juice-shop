@@ -73,6 +73,16 @@ export const authenticatedUsers: IAuthenticatedUsers = {
   tokenMap: {},
   idMap: {},
   put: function (token: string, user: ResponseWithUser) {
+    // Ensure inputs are valid
+    if (!token || !user || !user.data || !user.data.id) {
+      return
+    }
+    // If there is an existing token associated with this user ID, remove it to
+    // invalidate previous sessions when a new token is issued for the same user.
+    const existingToken = this.idMap[user.data.id]
+    if (existingToken && existingToken !== token) {
+      delete this.tokenMap[existingToken]
+    }
     this.tokenMap[token] = user
     this.idMap[user.data.id] = token
   },
