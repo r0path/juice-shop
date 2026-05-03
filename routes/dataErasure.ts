@@ -58,6 +58,24 @@ router.post('/', async (req: Request<Record<string, unknown>, Record<string, unk
     return
   }
 
+  // Anti-CSRF: ensure request is same-origin by validating Origin or Referer header
+  const originHeader = (req.get('origin') || req.get('referer') || '')
+  try {
+    if (!originHeader) {
+      next(new Error('Blocked potential CSRF attempt: missing Origin/Referer'))
+      return
+    }
+    const originHost = new URL(originHeader).host
+    const requestHost = req.get('host')
+    if (originHost !== requestHost) {
+      next(new Error('Blocked potential CSRF attempt from ' + originHeader))
+      return
+    }
+  } catch (e) {
+    next(new Error('Blocked potential CSRF attempt: invalid Origin/Referer'))
+    return
+  }
+
   try {
     await PrivacyRequestModel.create({
       UserId: loggedInUser.data.id,
