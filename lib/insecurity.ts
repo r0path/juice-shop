@@ -155,11 +155,20 @@ export const deluxeToken = (email: string) => {
 
 export const isAccounting = () => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const decodedToken = verify(utils.jwtFrom(req)) && decode(utils.jwtFrom(req))
-    if (decodedToken?.data?.role === roles.accounting) {
-      next()
-    } else {
-      res.status(403).json({ error: 'Malicious activity detected' })
+    const token = utils.jwtFrom(req)
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' })
+    }
+    try {
+      const decodedToken: any = jwt.verify(token, publicKey)
+      if (decodedToken?.data?.role === roles.accounting) {
+        next()
+      } else {
+        res.status(403).json({ error: 'Malicious activity detected' })
+      }
+    } catch (err) {
+      // jwt.verify will throw for invalid or expired tokens
+      res.status(401).json({ error: 'Invalid or expired token' })
     }
   }
 }
