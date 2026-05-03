@@ -138,10 +138,14 @@ module.exports = function placeOrder () {
           if (req.body.UserId) {
             if (req.body.orderDetails && req.body.orderDetails.paymentId === 'wallet') {
               const wallet = await WalletModel.findOne({ where: { UserId: req.body.UserId } })
-              if ((wallet != null) && wallet.balance >= totalPrice) {
-                WalletModel.decrement({ balance: totalPrice }, { where: { UserId: req.body.UserId } }).catch((error: unknown) => {
-                  next(error)
-                })
+              // Do not allow negative totalPrice to increase wallet balance. Only charge positive amounts.
+              const amountToCharge = totalPrice > 0 ? parseFloat(totalPrice.toFixed(2)) : 0
+              if ((wallet != null) && wallet.balance >= amountToCharge) {
+                if (amountToCharge > 0) {
+                  await WalletModel.decrement({ balance: amountToCharge }, { where: { UserId: req.body.UserId } }).catch((error: unknown) => {
+                    next(error)
+                  })
+                }
               } else {
                 next(new Error('Insufficient wallet balance.'))
               }
